@@ -1,0 +1,32 @@
+import librosa
+import numpy as np
+
+def is_piano(audio_file):
+    # Audiodatei laden
+    audio, sr = librosa.load(audio_file)
+
+    # Harmonische Komponenten extrahieren
+    harmonic_audio, _ = librosa.effects.hpss(audio)
+
+    # Obertonreihe berechnen
+    pitches, magnitudes, _ = librosa.pyin(harmonic_audio, fmin=librosa.note_to_hz('A0'), fmax=librosa.note_to_hz('C8'))
+
+    # Schwellenwert für die Klaviererkennung festlegen
+    threshold = 50  # Passen Sie diesen Wert an Ihre Anforderungen an
+
+    # Klaviererkennung
+    return np.any(pitches > threshold)
+
+
+if __name__ == "__main__":
+    # Beispieldatei laden
+    audio_file = "testgitarre.mp3"
+
+    # Klaviererkennung durchführen
+    is_piano = is_piano(audio_file)
+
+    # Ausgabe
+    if is_piano:
+        print("Die Audiodatei ist ein Klavier.")
+    else:
+        print("Die Audiodatei ist kein Klavier.")

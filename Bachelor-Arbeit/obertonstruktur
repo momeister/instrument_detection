@@ -1,0 +1,46 @@
+import librosa
+import numpy as np
+from scipy.signal import find_peaks
+
+def hz_to_note(frequency):
+    A4 = 440  # Frequenz der A4-Referenznote in Hz
+    A4_number = 69  # MIDI-Nummer der A4-Referenznote
+    note_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
+    note_number = int(round(12 * (np.log2(frequency) - np.log2(A4)) + A4_number))
+    octave = note_number // 12
+    note_name = note_names[note_number % 12]
+    return f"{note_name}{octave}"
+
+# Lade die MP3-Datei
+mp3_file = "testklavier.mp3"
+y, sr = librosa.load(mp3_file)
+
+# Berechne die Fourier-Transformation, um die Frequenzkomponenten zu erhalten
+fourier = np.fft.fft(y)
+freqs = np.fft.fftfreq(len(y))
+
+# Finde die Peaks im Spektrum (harmonische Töne)
+peaks, _ = find_peaks(np.abs(fourier), height=30)  # Höhe anpassen, um Schwelle für Peaks festzulegen
+
+if len(peaks) == 0:
+    print("Keine Peaks gefunden. Die Audiodatei enthält möglicherweise keine harmonischen Töne.")
+else:
+    # Grundtöne und ihre Obertöne ausgeben
+    for i, peak in enumerate(peaks):
+        grundton = abs(freqs[peak] * sr)
+        grundton_note = hz_to_note(grundton)
+        print(f"Frequenz: {grundton:.4f} Hz ({grundton_note})")
+
+        oberton_peaks = peaks[i + 1:i + 11]  # Die nächsten 10 Peaks
+        obertöne = [abs(freqs[oberton_peak] * sr) for oberton_peak in oberton_peaks]
+        intensitäten = [np.abs(fourier[oberton_peak]) for oberton_peak in oberton_peaks]
+
+        print("Obertöne:", end=" ")
+        for oberton in obertöne:
+            oberton_note = hz_to_note(oberton)
+            print(f"{oberton:.4f} Hz ({oberton_note})", end=", ")
+        print("\nIntensität:", end=" ")
+        for intensität in intensitäten:
+            print(f"{intensität:.4f}", end=", ")
+        print("\n" + "-" * 40)

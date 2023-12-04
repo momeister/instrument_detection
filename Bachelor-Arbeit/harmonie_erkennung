@@ -1,0 +1,56 @@
+import numpy as np
+import scipy.io.wavfile as wav
+
+# Laden der Audiodatei (ersetzen Sie 'audio.wav' durch Ihren Dateinamen)
+sample_rate, audio_data = wav.read('Klänge/einstimmig-1.wav')
+
+# Festlegen des Zeitbereichs von 1 bis 2 Sekunden
+start_time = 1.0  # Startzeit in Sekunden
+end_time = 1.001    # Endzeit in Sekunden
+start_sample = int(start_time * sample_rate)
+end_sample = int(end_time * sample_rate)
+
+# Extrahieren der Audiodaten für den Zeitbereich von Sekunde 1
+audio_data = audio_data[start_sample:end_sample]
+
+# Überprüfen der Sample-Rate und der Audiodaten
+print(f"Sample-Rate: {sample_rate}")
+print(f"Länge der Audiodaten (im ausgewählten Zeitbereich): {len(audio_data)}")
+
+# FFT durchführen
+fft_result = np.fft.fft(audio_data)
+fft_magnitude = np.abs(fft_result)
+fft_freqs = np.fft.fftfreq(len(fft_result), 1 / sample_rate)
+
+# Finden des Hauptpeaks mit einer Schwellenwertmethode
+threshold = 0.9 * np.max(fft_magnitude)  # Passen Sie den Schwellenwert an
+main_peak = np.argmax(fft_magnitude[1:]) + 1  # Ignorieren Sie Gleichstromkomponente
+print(f"Index des Hauptpeaks: {main_peak}")
+
+# Frequenzen der ersten 5 Obertöne
+obertoene = []
+
+for i in range(1, 6):
+    oberton_index = main_peak * i
+    if oberton_index >= 0 and oberton_index < len(fft_freqs):
+        oberton_freq = fft_freqs[oberton_index]
+        if oberton_freq >= 20 and oberton_freq <= 20000:
+            obertoene.append(oberton_freq)
+
+print(f"Die Frequenzen der ersten 5 Obertöne im hörbaren Bereich in Sekunde 1 (von {start_time} bis {end_time} Sekunden) sind:")
+print(obertoene)
+
+# Überprüfung der Harmonizität der Obertöne mit Toleranz
+harmonisch = True
+for i in range(1, 6):
+    oberton_index = int(main_peak * i)
+    if oberton_index >= 0 and oberton_index < len(fft_freqs):
+        frequency_ratio = fft_freqs[oberton_index] / fft_freqs[main_peak]
+        if abs(frequency_ratio - i) > 0.1:
+            harmonisch = False
+            break
+
+if harmonisch:
+    print("Die Obertöne sind harmonisch (wahrscheinlich Trompete).")
+else:
+    print("Die Obertöne sind nicht harmonisch (wahrscheinlich Violine).")

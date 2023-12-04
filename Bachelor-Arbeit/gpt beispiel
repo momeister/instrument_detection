@@ -1,0 +1,47 @@
+import librosa
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import find_peaks
+
+# Load the audio file
+audio_file = 'random.mp3'
+y, sr = librosa.load(audio_file)
+
+# Define a function to extract harmonics
+def extract_harmonics(y, sr, num_harmonics):
+    # Calculate the Short-Time Fourier Transform (STFT)
+    D = librosa.stft(y)
+
+    # Convert the STFT to an amplitude envelope
+    magnitude = np.abs(D)
+
+    # Find peaks in the amplitude envelope
+    max_magnitude = magnitude.max(axis=0)
+    peaks, _ = find_peaks(max_magnitude, height=0.01)
+
+    # Extract the frequencies of the peaks
+    peak_frequencies = librosa.fft_frequencies(sr=sr)[peaks]
+
+    # Sort the peaks by frequency
+    sorted_peaks = peak_frequencies[np.argsort(peak_frequencies)]
+
+    # Select the first 'num_harmonics' harmonics, but limit to the available peaks
+    harmonics = sorted_peaks[:min(num_harmonics, len(sorted_peaks))]
+
+    return harmonics
+
+# Number of harmonics to analyze
+num_harmonics = 10
+
+# Extract the first 'num_harmonics' harmonics
+harmonics = extract_harmonics(y, sr, num_harmonics)
+
+# Print the detected harmonics
+print("The first", num_harmonics, "harmonics are:", harmonics)
+
+# Plot the amplitude envelope with the detected harmonics
+plt.figure(figsize=(12, 6))
+librosa.display.specshow(librosa.amplitude_to_db(magnitude, ref=np.max), y_axis='log', x_axis='time')
+plt.title('Amplitude Envelope with Detected Harmonics')
+plt.colorbar(format='%+2.0f dB')
+plt.show()

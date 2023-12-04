@@ -1,0 +1,46 @@
+import mido
+import librosa
+import numpy as np
+
+# Laden Sie die .wav-Datei
+audio_file = "Klänge/einstimmig-2.wav"
+
+# Laden Sie das Musikstück und konvertieren Sie es in einen Konstant-Q-Chromagramm
+y, sr = librosa.load(audio_file)
+chromagram = librosa.feature.chroma_cqt(y=y, sr=sr)
+
+# Extrahieren der Tonartänderungen
+tonartwechsel = np.where(np.diff(np.argmax(chromagram, axis=0)))[0]
+
+# Fügen Sie die Endzeit des letzten Rahmens hinzu
+tonartwechsel = np.append(tonartwechsel, len(chromagram.T) - 1)
+
+# Konvertieren Sie die Zeitpunkte in Sekunden
+time_points = librosa.frames_to_time(tonartwechsel, sr=sr)
+
+# Erstellen Sie eine leere MIDI-Datei
+midi_file = mido.MidiFile()
+
+# Erstellen Sie ein MIDI-Track-Objekt
+track = mido.MidiTrack()
+midi_file.tracks.append(track)
+
+# Erstellen Sie eine Funktion zur Berechnung der MIDI-Notenwerte aus den Tonartwechseln
+def tonart_to_midi(note):
+    # Hier können Sie eine Zuordnung der Tonart zu MIDI-Notenwerten vornehmen
+    # Zum Beispiel, C4 (Mittel-C) entspricht MIDI-Note 60
+    return 60 + note
+
+# Erzeugen Sie die MIDI-Ereignisse für die Tonartwechsel
+for i in range(len(time_points)):
+    tonart_index = np.argmax(chromagram[:, tonartwechsel[i]])
+    note_value = tonart_to_midi(tonart_index)
+    time = time_points[i]
+    # Hier können Sie die Länge der Noten und andere Parameter anpassen
+    note_on = mido.Message('note_on', note=note_value, velocity=64, time=int(time * 1000))
+    note_off = mido.Message('note_off', note=note_value, velocity=64, time=0)
+    track.append(note_on)
+    track.append(note_off)
+
+# Speichern Sie die generierte MIDI-Datei
+midi_file.save('output.mid')
