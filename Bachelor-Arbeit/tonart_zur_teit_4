@@ -12,8 +12,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 #audio_file = "Klänge/einstimmig-2-mp.mp3"
 #audio_file = "Klänge/einstimmig-cello.mp3"
 #audio_file = "Klänge/einstimmig-klavier.mp3"
-#audio_file = "Klänge/einstimmig-oboe.mp3"
-audio_file = "Klänge\mehrstimmig-2.mp3"
+audio_file = "Klänge/einstimmig-oboe.mp3"
+#audio_file = "Klänge\mehrstimmig-2.mp3"
 #audio_file = "Klänge\mehrstimmig-3.mp3"
 #audio_file = "Klänge\mehrstimmig-oboe-trompete-cello-auseinander.mp3"
 #audio_file = "Klänge\mehrstimmig-4.mp3"
@@ -210,7 +210,7 @@ def check_fundamental_frequency_intensity4(hint_list, tolerance=1e-2):
     
     high_intensity_in_third_fourth_overtone = any(intensity > 1 for intensity in overtone_intensities[2:4])
     
-    print("is_fundamental_highest: ", is_fundamental_highest, "| complexity: ", complexity, "| intensity_increases: ", intensity_increases, "| higher_overtone_intensity", higher_overtone_intensity)
+    #print("is_fundamental_highest: ", is_fundamental_highest, "| complexity: ", complexity, "| intensity_increases: ", intensity_increases, "| higher_overtone_intensity", higher_overtone_intensity)
     
     
     points = {"Violine": 0, "Trompete": 0, "Klavier": 0, "Oboe": 0}
@@ -257,7 +257,7 @@ def check_fundamental_frequency_intensity4(hint_list, tolerance=1e-2):
         points["Trompete"] += 3
         points["Oboe"] += 3
 
-    print("points", points)
+    #print("points", points)
 
     # Bestimmung des wahrscheinlichsten Instruments
     most_likely_instrument = max(points, key=points.get)
@@ -269,33 +269,35 @@ def check_fundamental_frequency_intensity4(hint_list, tolerance=1e-2):
     if points[most_likely_instrument] == max(points.values()):
         return instrument_ids[most_likely_instrument]
     else:
-        return 1  # Sonstige, wenn kein Instrument dominiert
+        return 1 
     
 def check_fundamental_frequency_intensity_with_more_instruments(hint_list, tolerance=1e-2):
     fundamental_intensity = hint_list[0][1]
     overtone_intensities = [hint[1] for hint in hint_list[1:]]
 
-    # Überprüfung, ob der Grundton die höchste Intensität hat
+    # Überprüfung, ob Grundton die höchste Intensität hat
     is_fundamental_highest = fundamental_intensity > max(overtone_intensities)
 
-    # Analyse der Komplexität der Obertonreihe
+    # Analyse  Komplexität der Obertonreihe
     complexity = sum(intensity >= 0.01 for intensity in overtone_intensities)
 
-    # Analyse der Intensitätsänderungen in den Obertönen
+    # Analyse  Intensitätsänderungen in den Obertönen
     intensity_increases = sum(round(overtone_intensities[i], 2) > round(overtone_intensities[i - 1], 2) for i in range(1, len(overtone_intensities)))
     
+    # Überprüft höhere Obertöne nach "stärkerer" Intensität
     higher_overtone_intensity = sum(intensity > 0.10 for intensity in overtone_intensities[9:15])
     
+    # Überprüft Obertöne 3 und 4 nach hohen Intensitäten
     high_intensity_in_third_fourth_overtone = any(intensity > 1 for intensity in overtone_intensities[2:4])
     
+    # Schaut ob mehr als 3 Obertöne erkannt werden
     has_more_than_three_overtone = all(intensity <= tolerance for intensity in overtone_intensities[3:])
     
-    print("is_fundamental_highest: ", is_fundamental_highest, "| complexity: ", complexity, "| intensity_increases: ", intensity_increases, "| higher_overtone_intensity", higher_overtone_intensity)
+    #print("is_fundamental_highest: ", is_fundamental_highest, "| complexity: ", complexity, "| intensity_increases: ", intensity_increases, "| higher_overtone_intensity", higher_overtone_intensity)
     
     
     points = {"Violine": 0, "Trompete": 0, "Klavier": 0, "Oboe": 0}
 
-    # is_fundamental_highest
     if is_fundamental_highest:
         points["Violine"] += 4
         points["Klavier"] += 4
@@ -305,7 +307,6 @@ def check_fundamental_frequency_intensity_with_more_instruments(hint_list, toler
         points["Trompete"] += 5
         points["Oboe"] += 5
 
-    # Complexity
     if complexity > 14:
         points["Oboe"] += 3
     elif complexity > 10:
@@ -315,7 +316,6 @@ def check_fundamental_frequency_intensity_with_more_instruments(hint_list, toler
     else:
         points["Klavier"] += 3
 
-    # Intensity Increases
     if intensity_increases > 4:
         points["Oboe"] += 3
     elif intensity_increases > 0:
@@ -325,7 +325,6 @@ def check_fundamental_frequency_intensity_with_more_instruments(hint_list, toler
     else:
         points["Klavier"] += 3
 
-    # Higher Overtone Intensity
     if higher_overtone_intensity > 2:
         points["Oboe"] += 5
     else:
@@ -333,12 +332,9 @@ def check_fundamental_frequency_intensity_with_more_instruments(hint_list, toler
         points["Trompete"] += 2
         points["Klavier"] += 1
 
-    # High Intensity in Third and Fourth Overtone
     if high_intensity_in_third_fourth_overtone:
         points["Trompete"] += 3
         points["Oboe"] += 3
-
-    print("points", points)
 
     # Bestimmung des wahrscheinlichsten Instruments
     most_likely_instrument = max(points, key=points.get)
@@ -388,6 +384,7 @@ for i in range(len(time_points)):
 
     if end_time - start_time >= mindestdauer:
         tonart_index = np.argmax(chromagram[:, tonartwechsel[i]])
+        print("tonart_index: ", tonart_index)
 
         if tonart_index != previous_tonart_index:
             tonart = tonart_names[tonart_index]
@@ -421,7 +418,7 @@ for i in range(len(time_points)):
             grundfrequenz = current_grundfrequenz
 
             if grundfrequenz >= grundfrequenz_schwellenwert and grundfrequenz <= 4000:
-                print(f"\nTonart {tonart} (Grundfrequnez: {grundfrequenz} Hz) von {start_time:.2f}s bis {end_time:.2f}s")
+                print(f"\nTonart {tonart} (Grundfrequenz: {grundfrequenz} Hz) von {start_time:.2f}s bis {end_time:.2f}s")
                 
                 grundton_intensität = None
                 intensity_array_for_note = []
@@ -447,7 +444,7 @@ for i in range(len(time_points)):
         previous_tonart_index = tonart_index
     start_time = end_time
 
-# Teilt overtone_freq_array in Unterlisten der Länge 15
+# Teilt overtone_freq_array in Unterlisten der Länge 20
 sublists_overtone_freq = [overtone_freq_array[i:i + 20] for i in range(0, len(overtone_freq_array), 20)]
 
 # Stellen sicher, ob sublists_overtone_freq und intensity_array gleich lang sind
