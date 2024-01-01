@@ -61,10 +61,10 @@ def get_half_frequency_intensity(audio_segment, sr, fundamental_frequency):
     return half_frequency, intensity
 
 def instrument_analyze_for_one_instrument(intensity_data):
-    # Count how often each number occurs in the array
+    # Count how often each number occurs in the list
     counts = {i: intensity_data.count(i) for i in set(intensity_data)}
 
-    # Check whether the array predominantly contains 5s, 4s, 3s or 2s
+    # Check whether the list predominantly contains 5s, 4s, 3s or 2s
     if counts.get(5, 0) >= len(intensity_data) / 2:
         return "Klavier"
     elif counts.get(4, 0) >= len(intensity_data) / 2:
@@ -87,7 +87,7 @@ def instrument_analyze_for_multiple_instruments(intensity_data, threshold_percen
     total_elements = len(intensity_data)
     threshold_count = (threshold_percentage / 100) * total_elements
 
-    # Count how often each relevant number occurs in the array
+    # Count how often each relevant number occurs in the list
     counts = {i: intensity_data.count(i) for i in set(intensity_data) if i in instruments}
 
     # Filtering instruments that occur less frequently than the threshold value or only once
@@ -361,7 +361,7 @@ minimum_duration = 0.05
 # Threshold value for the fundamental_frequency (in Hertz)
 fundamental_frequency_threshold_value = 30.0
 
-overtone_intensity_check_array = []
+overtone_intensity_check_list = []
 
 start_time = 0.0
 previous_pitch_index = None  # Variable for tracking the previous pitch
@@ -454,7 +454,7 @@ freq_and_intensity = [
 
 if not potential_hints:
     for seperate_freq_and_intensity in freq_and_intensity: 
-        overtone_intensity_check_array.append(check_fundamental_frequency_intensity4(seperate_freq_and_intensity))
+        overtone_intensity_check_list.append(check_fundamental_frequency_intensity4(seperate_freq_and_intensity))
 
 print("\nAlle nicht der Obertonreihe entsprechenden Frequenzen:")
 
@@ -462,17 +462,17 @@ more_than_one_instrument = False
 
 if potential_hints:
     for seperate_freq_and_intensity in freq_and_intensity: 
-        overtone_intensity_check_array.append(check_fundamental_frequency_intensity_with_more_instruments(seperate_freq_and_intensity))
+        overtone_intensity_check_list.append(check_fundamental_frequency_intensity_with_more_instruments(seperate_freq_and_intensity))
     for hint_list in potential_hints:
         for hint_list_2 in hint_list:
-            overtone_intensity_check_array.append(check_fundamental_frequency_intensity_with_more_instruments(hint_list_2))
+            overtone_intensity_check_list.append(check_fundamental_frequency_intensity_with_more_instruments(hint_list_2))
             more_than_one_instrument = True
 
-print(overtone_intensity_check_array)
+print(overtone_intensity_check_list)
             
 # Output for one instrument
 if not more_than_one_instrument:
-    instrument = instrument_analyze_for_one_instrument(overtone_intensity_check_array)
+    instrument = instrument_analyze_for_one_instrument(overtone_intensity_check_list)
     print(f"Das Instrument ist wahrscheinlich eine {instrument}.")
 else:
-    instrument_analyze_for_multiple_instruments(overtone_intensity_check_array)    
+    instrument_analyze_for_multiple_instruments(overtone_intensity_check_list)    
