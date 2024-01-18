@@ -6,17 +6,13 @@ from scipy.signal import find_peaks
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-# Laden Sie die .wav-Datei
-
-audio_file = "Klaenge/einstimmig-1-mp.mp3"
-#audio_file = "Klaenge/einstimmig-2-mp.mp3"
-#audio_file = "Klaenge/einstimmig-cello.mp3"
-#audio_file = "Klaenge/einstimmig-klavier.mp3"
-#audio_file = "Klaenge/einstimmig-oboe.mp3"
-#audio_file = "Klaenge\mehrstimmig-2.mp3"
-#audio_file = "Klaenge\mehrstimmig-3.mp3"
-#audio_file = "Klaenge\mehrstimmig-oboe-trompete-cello-auseinander.mp3"
-#audio_file = "Klaenge\mehrstimmig-4.mp3"
+audio_file = "Klaenge/einstimmig-1-mp.mp3"      # Violine
+#audio_file = "Klaenge/einstimmig-2-mp.mp3"     # Trompete
+#audio_file = "Klaenge/einstimmig-klavier.mp3"  # Klavier
+#audio_file = "Klaenge/einstimmig-oboe.mp3"     # Oboe
+#audio_file = "Klaenge\mehrstimmig-2.mp3"       # Violine, Trompete
+#audio_file = "Klaenge\mehrstimmig-3.mp3"       # Violine, Trompete, Oboe
+#audio_file = "Klaenge\mehrstimmig-4.mp3"       # Violine, Trompete, Oboe, Klavier
 
 # Loading the piece of music and converting it into a constant Q-chromagram
 y, sr = librosa.load(audio_file)
